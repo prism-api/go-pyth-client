@@ -124,7 +124,7 @@ func (c *Client) subscribeWithRetries(ctx context.Context, sleep time.Duration, 
 				"encountered an error when subscribing to SSE stream, now retrying...",
 				"error", err, "num_retries", retries,
 			)
-			if retries >= maxRetries {
+			if maxRetries > 0 && retries >= maxRetries {
 				panic(fmt.Sprintf("failed to subscribe to SSE stream after %d attempts: %v",
 					retries, err))
 			}
