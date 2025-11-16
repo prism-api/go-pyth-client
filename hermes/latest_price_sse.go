@@ -12,15 +12,9 @@ import (
 	sse "github.com/r3labs/sse/v2"
 )
 
-// Retry parameters.
-const (
-	initialBackoff = 1 * time.Second
-	maxRetries     = 3
-)
-
 // Subscribe price feed from the streaming `v2/updates/price/stream` endpoint. Ensures this only
 // happens once in the scope of runtime. Any further calls to this are unnecessary and no-ops.
-func (c *Client) SubscribePriceStreaming(ctx context.Context, priceFeeds ...string) {
+func (c *Client) SubscribePriceStreaming(ctx context.Context, sleep time.Duration, maxRetries int, priceFeeds ...string) {
 	c.subscribeOnce.Do(func() {
 		client := sse.NewClient(c.buildBatchURLStream(priceFeeds...))
 
@@ -33,7 +27,7 @@ func (c *Client) SubscribePriceStreaming(ctx context.Context, priceFeeds ...stri
 		// Subscribe to the SSE using the context and the channel
 		// Use goroutine since SSE Subscribe will block the current thread
 		// see https://github.com/r3labs/sse/blob/master/README.md
-		go c.subscribeWithRetries(ctx, subscribe)
+		go c.subscribeWithRetries(ctx, sleep, maxRetries, subscribe)
 	})
 }
 
@@ -109,10 +103,10 @@ func (c *Client) waitForReady(ctx context.Context) error {
 	}
 }
 
-// subscribeWithRetries retries a subscription up to maxRetries with exponential backoff.
+// subscribeWithRetries retries a subscription up to maxRetries with sleep.
 // If the task fails after maxRetries, it panics to indicate a critical failure.
-func (c *Client) subscribeWithRetries(ctx context.Context, subscribe func() error) {
-	backoff := initialBackoff
+func (c *Client) subscribeWithRetries(ctx context.Context, sleep time.Duration, maxRetries int, subscribe func() error) {
+
 	retries := 0
 
 	for retries < maxRetries {
@@ -136,9 +130,7 @@ func (c *Client) subscribeWithRetries(ctx context.Context, subscribe func() erro
 					retries, err))
 			}
 
-			// #nosec:G404 // fine.
-			time.Sleep(backoff + time.Duration(rand.Intn(1000))*time.Millisecond)
-			backoff *= 2
+			time.Sleep(sleep)
 		}
 	}
 }
