@@ -45,7 +45,7 @@ type Hermes interface {
 	// Subscribe price feed from the streaming `v2/updates/price/stream` endpoint. Ensures this
 	// only happens once in the scope of runtime. Any further calls to this are unnecessary and
 	// no-ops.
-	SubscribePriceStreaming(ctx context.Context, priceFeeds ...string)
+	SubscribePriceStreaming(ctx context.Context, sleep time.Duration, maxRetries int, priceFeeds ...string)
 
 	// Queries cached price feed update data, obtained from the SSE streaming endpoint.
 	// Returns the Pyth PriceFeed struct and the price feed update data for each pair.

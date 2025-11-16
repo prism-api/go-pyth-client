@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"math/rand"
 	"time"
 
 	"github.com/calbera/go-pyth-client/types"

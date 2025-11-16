@@ -2,6 +2,7 @@ package hermes_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -9,7 +10,7 @@ import (
 func TestSubscribePriceStreaming(t *testing.T) {
 	ctx, pythClient := setUp()
 
-	pythClient.SubscribePriceStreaming(ctx, testPairs...)
+	pythClient.SubscribePriceStreaming(ctx, 1*time.Second, 3, testPairs...)
 
 	prices, err := pythClient.GetCachedLatestPriceUpdates(ctx, testPairs...)
 	assert.NoError(t, err)
@@ -22,7 +23,7 @@ func TestSubscribePriceStreaming(t *testing.T) {
 func TestSubscribePriceStreaming_EmptyRequests(t *testing.T) {
 	ctx, pythClient := setUp()
 
-	pythClient.SubscribePriceStreaming(ctx, testPairs...)
+	pythClient.SubscribePriceStreaming(ctx, 1*time.Second, 3, testPairs...)
 
 	var empty_pair = []string{}
 
@@ -34,7 +35,7 @@ func TestSubscribePriceStreaming_EmptyRequests(t *testing.T) {
 func TestSubscribePriceStreaming_PriceFeedNotSubscribed(t *testing.T) {
 	ctx, pythClient := setUp()
 
-	pythClient.SubscribePriceStreaming(ctx, testPairs...)
+	pythClient.SubscribePriceStreaming(ctx, 1*time.Second, 3, testPairs...)
 
 	var feed = []string{"USD/CAD"}
 
@@ -47,7 +48,7 @@ func TestSubscribePriceStreaming_PriceFeedNotSubscribed(t *testing.T) {
 func BenchmarkGetCachedLatestPriceUpdates(b *testing.B) {
 	ctx, pythClient := setUp()
 
-	pythClient.SubscribePriceStreaming(ctx, testPairs...)
+	pythClient.SubscribePriceStreaming(ctx, 1*time.Second, 3, testPairs...)
 
 	for i := 0; i < b.N; i++ {
 		prices, err := pythClient.GetCachedLatestPriceUpdates(ctx, testPairs...)
