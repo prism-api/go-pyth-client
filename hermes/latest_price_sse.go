@@ -108,7 +108,7 @@ func (c *Client) subscribeWithRetries(ctx context.Context, sleep time.Duration, 
 
 	retries := 0
 
-	for retries < maxRetries {
+	for maxRetries == 0 || retries < maxRetries {
 		select {
 		case <-ctx.Done():
 			c.logger.Error("context cancelled while trying to subscribe to SSE stream")
@@ -124,7 +124,7 @@ func (c *Client) subscribeWithRetries(ctx context.Context, sleep time.Duration, 
 				"encountered an error when subscribing to SSE stream, now retrying...",
 				"error", err, "num_retries", retries,
 			)
-			if maxRetries > 0 && retries >= maxRetries {
+			if maxRetries != 0 && retries >= maxRetries {
 				panic(fmt.Sprintf("failed to subscribe to SSE stream after %d attempts: %v",
 					retries, err))
 			}
